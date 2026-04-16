@@ -8,22 +8,51 @@ on:
   pull_request:
 
 jobs:
-  test-backend:
-    runs-on: ubuntu-24.04
+    test-backend:
+        runs-on: ubuntu-24.04
 
-    steps:
-      # 1. Récupérer le code
-      - name: Checkout code
-        uses: actions/checkout@v4
+        steps:
+          # 1. Récupérer le code
+          - name: Checkout code
+            uses: actions/checkout@v4
 
-      # 2. Installer Java 21
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
+          # 2. Installer Java 21
+          - name: Set up JDK 21
+            uses: actions/setup-java@v4
+            with:
+              java-version: '21'
+              distribution: 'temurin'
 
-      # 3. Build + tests Maven
-      - name: Build and test with Maven
-        working-directory: ./backend
-        run: mvn clean verify
+          # 3. Build + tests Maven
+          - name: Build and test with Maven
+            working-directory: ./backend
+            run: mvn clean verify
+
+    build-docker-images:
+        needs: test-backend
+        runs-on: ubuntu-24.04
+
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
+
+          - name: Build backend image
+            uses: docker/build-push-action@v6
+            with:
+              context: ./backend
+              push: false
+              tags: my-backend:latest
+
+          - name: Build database image
+            uses: docker/build-push-action@v6
+            with:
+              context: ./database
+              push: false
+              tags: my-database:latest
+
+          - name: Build httpd image
+            uses: docker/build-push-action@v6
+            with:
+              context: ./httpd
+              push: false
+              tags: my-httpd:latest
