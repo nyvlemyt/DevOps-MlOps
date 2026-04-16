@@ -174,10 +174,54 @@ et j'ai obtenu "Hello World!" dans les logs du conteneur.
 - Il améliore la maintenabilité et la sécurité.
 
 
+## 1-9 Documenter les commandes de publication et les images publiées sur Docker Hub
+
+Pour publier mes images Docker, je me suis d’abord connecté à Docker Hub :
+```
+docker login
+``` 
+
+
+Ensuite, j’ai tagué chaque image locale avec mon nom d’utilisateur Docker Hub et un tag de version :
+```
+docker tag my-database melvynlpp/my-database:1.0
+docker tag my-backend melvynlpp/my-backend:1.0
+docker tag my-httpd melvynlpp/my-httpd:1.0
+```
+
+Après cela, j’ai poussé les images vers Docker Hub :
+```
+docker push melvynlpp/my-database:1.0
+docker push melvynlpp/my-backend:1.0
+docker push melvynlpp/my-httpd:1.0
+```
+
+Images publiées :
+```
+melvynlpp/my-database:1.0
+melvynlpp/my-backend:1.0
+melvynlpp/my-httpd:1.0
+```
+
+## 1-10 Why do we put our images into an online repo?
+
+#### Pourquoi met-on nos images dans un dépôt en ligne ?
+
+Nous plaçons les images Docker dans un dépôt en ligne afin de pouvoir les partager, les versionner et les réutiliser facilement sur d’autres machines ou par d’autres membres de l’équipe.
+Cela facilite également le déploiement, car un serveur ou un autre développeur peut récupérer exactement la même image sans avoir à la reconstruire localement.
+Les registres en ligne sont aussi essentiels en environnement professionnel, car ils s’intègrent parfaitement avec les pipelines CI/CD et les workflows de déploiement.
+
+
 ```
 
 ``` 
 
+```
+
+``` 
+```
+
+``` 
 ```
 
 ``` 
