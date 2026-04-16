@@ -33,26 +33,29 @@ jobs:
         runs-on: ubuntu-24.04
 
         steps:
-          - name: Checkout code
-            uses: actions/checkout@v4
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-          - name: Build backend image
-            uses: docker/build-push-action@v6
-            with:
-              context: ./backend
-              push: false
-              tags: my-backend:latest
+            - name: Login to DockerHub
+              run: echo "${{ secrets.TOKEN }}" | docker login --username ${{ secrets.USERNAME }} --password-stdin
 
-          - name: Build database image
-            uses: docker/build-push-action@v6
-            with:
-              context: ./database
-              push: false
-              tags: my-database:latest
+            - name: Build and push backend
+              uses: docker/build-push-action@v6
+              with:
+                context: ./backend
+                push: ${{ github.ref == 'refs/heads/main' }}
+                tags: ${{ secrets.USERNAME }}/tp-devops-backend:latest
 
-          - name: Build httpd image
-            uses: docker/build-push-action@v6
-            with:
-              context: ./httpd
-              push: false
-              tags: my-httpd:latest
+            - name: Build database image
+              uses: docker/build-push-action@v6
+              with:
+                context: ./database
+                push: ${{ github.ref == 'refs/heads/main' }}
+                tags: ${{ secrets.USERNAME }}/tp-devops-database:latest
+
+            - name: Build httpd image
+              uses: docker/build-push-action@v6
+              with:
+                context: ./httpd
+                push: ${{ github.ref == 'refs/heads/main' }}
+                tags: ${{ secrets.USERNAME }}/tp-devops-httpd:latest
