@@ -56,3 +56,5 @@ jobs:
               context: ./httpd
               push: false
               tags: my-httpd:latest
+
+              
