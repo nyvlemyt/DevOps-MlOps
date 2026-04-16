@@ -25,4 +25,5 @@ jobs:
 
       # 3. Build + tests Maven
       - name: Build and test with Maven
+        working-directory: ./backend
         run: mvn clean verify
