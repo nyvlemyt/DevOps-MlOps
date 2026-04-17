@@ -1,59 +1,56 @@
-name: CI devops
+name: CD
 
 on:
-  push:
-    branches:
-      - main
-      - develop
-  pull_request:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
 
 jobs:
-  test-backend:
+  build-and-push-docker:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      # 2. Detect changes
+      - name: Detect changes
+        id: changes
+        uses: dorny/paths-filter@v3
         with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Build and test with Maven
-        working-directory: ./backend
-        run: mvn -B verify sonar:sonar -Dsonar.projectKey=nyvlemyt_DevOps-MlOps -Dsonar.organization=nyvlem -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
-  build-docker-images:
-    needs: test-backend
-    runs-on: ubuntu-24.04
-
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+          filters: |
+            backend:
+              - 'backend/**'
+            database:
+              - 'database/**'
+            httpd:
+              - 'httpd/**'
 
       - name: Login to DockerHub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Build and push backend image
+        if: steps.changes.outputs.backend == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ./backend
-          push: ${{ github.ref == 'refs/heads/main' }}
+          push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-backend:latest
 
       - name: Build and push database image
+        if: steps.changes.outputs.database == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ./database
-          push: ${{ github.ref == 'refs/heads/main' }}
+          push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
 
       - name: Build and push httpd image
+        if: steps.changes.outputs.httpd == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ./httpd
-          push: ${{ github.ref == 'refs/heads/main' }}
+          push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
